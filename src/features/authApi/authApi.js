@@ -20,7 +20,7 @@ export const loginUser = async(formData)=>{
 }
 
 //  logout user
-export const logoutUser = async()=>{
+export const logoutUser = async() =>{
         const data = await api.post("/logout");
         return data ;
 }
@@ -28,8 +28,9 @@ export const logoutUser = async()=>{
 // Get current user
 export const fetchCurrentUser = async () => {
     const { data } = await api.get("/current-user");
+    console.log('Raw API response:', data);
     return data;
-  };
+};
 
 // Change password
 export const changePassword = async (formData) => {
