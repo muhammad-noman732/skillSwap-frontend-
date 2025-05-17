@@ -1,18 +1,23 @@
 import React from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-import { ToastContainer } from 'react-toastify';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import store from './store/store.js'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import App from './App'
+import './index.css'
+import store from './store/store'
+
+// Create a client
 const queryClient = new QueryClient()
 
-createRoot(document.getElementById('root')).render(
-   <Provider store={store}>
-    <QueryClientProvider client={queryClient}>
-    <App />
-    <ToastContainer/>
-    </QueryClientProvider>
-  </Provider>,
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </Provider>
+  </React.StrictMode>
 )

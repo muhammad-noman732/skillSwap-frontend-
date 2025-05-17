@@ -1,24 +1,53 @@
 import React, { useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
-import { useLogin } from '../../features/Queries/authQuerie';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useLogin, useCurrentUser } from '../../features/Queries/authQuerie';
+import { toast } from 'react-toastify';
+import { setCredentials } from '../../store/features/authSlice';
+import { QueryClient , useQueryClient } from '@tanstack/react-query';
 
 const Login = () => {
   const { mutate: loginUser, isLoading, error } = useLogin();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    // Check for Google login success or error
+    const params = new URLSearchParams(location.search);
+    const googleSuccess = params.get('googleSuccess');
+    const googleError = params.get('error');
+
+    if (googleSuccess === 'true') {
+      // Force refetch current user data
+      queryClient.invalidateQueries(['currentuser']).then(() => {
+        // After fetching user data, redirect to home or intended route
+        const from = location.state?.from || '/';
+        navigate(from, { replace: true });
+      });
+    } else if (googleError) {
+      // Handle Google login errors
+      let errorMessage = 'Google login failed';
+      if (googleError === 'no_user') {
+        errorMessage = 'Failed to get user information from Google';
+      } else if (googleError === 'auth_failed') {
+        errorMessage = 'Authentication failed';
+      }
+      toast.error(errorMessage);
+      // Remove the error parameter
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.search, queryClient, navigate, location.pathname, location.state]);
 
   const googleLogin = () => {
+    // Direct navigation to Google auth
     window.location.href = 'http://localhost:8000/api/auth/google';
   };
-
-  // useEffect(() => {
-  //   if (isAuthenticated && user) {
-  //     navigate("/");
-  //   }
-  // }, [isAuthenticated, user, navigate]);
 
   const validationSchema = Yup.object({
     email: Yup.string().email('Invalid email address').required('Email is required'),

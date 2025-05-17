@@ -2,7 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   user: null,
-  // token: null,
   isAuthenticated: false,
 };
 
@@ -13,13 +12,19 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (state, action) => {
       console.log('Setting credentials with:', action.payload);
-      state.user = action.payload;
-      state.isAuthenticated = true;
+      if (action.payload) {
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        console.log('Auth state after update:', state);
+      } else {
+        console.warn('Attempted to set credentials with null/undefined payload');
+      }
     },
     clearCredentials: (state) => {
+      console.log('Clearing credentials');
       state.user = null;
-      // state.token = null;
       state.isAuthenticated = false;
+      console.log('Auth state after clearing:', state);
     }
   },
 });
